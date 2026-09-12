@@ -1,210 +1,27 @@
-const residents = [
-  {name:"Mr Lewis", room:"12", note:"Dementia · walking frame", detail:"Likes Newcastle United, tea and football"},
-  {name:"Mrs Patel", room:"6", note:"Type 2 diabetes · osteoarthritis", detail:"Values independence and calm support"},
-  {name:"Mrs Green", room:"14", note:"Pain and comfort monitoring", detail:"Requires attentive observation"},
-  {name:"Mr Harris", room:"4", note:"Parkinson's disease · diabetes", detail:"Likes animals and conversation"},
-  {name:"Mrs Carter", room:"10", note:"Mobility support", detail:"Needs safe moving & handling"},
-  {name:"Mr Wilson", room:"8", note:"Post-stroke support", detail:"Needs patient communication"},
-  {name:"Mrs Thompson", room:"1", note:"Dementia support", detail:"Benefits from reassurance"},
-  {name:"Mr Baker", room:"16", note:"High falls risk", detail:"Requires prompt risk-aware support"}
-];
 
-const initialStats = {xp:0,safety:80,dignity:80,wellbeing:80,teamwork:80,reputation:80};
-
-const events = [
-  {
-    time:"07:05",
-    title:"Two call bells at once",
-    tag:"Prioritise",
-    text:"Mr Lewis and Mrs Patel both ring their call bells. Mrs Patel says she urgently needs the toilet. Mr Lewis sounds confused and says he needs to get ready for work.",
-    choices:[
-      {text:"Attend Mrs Patel and ask a colleague to respond to Mr Lewis", score:{safety:3,dignity:3,teamwork:4,xp:20}, tone:"good", feedback:"Good prioritisation. You respond to the urgent toileting need while delegating Mr Lewis's call so neither resident is left unsupported.", residents:["Mrs Patel","Mr Lewis"]},
-      {text:"Attend Mr Lewis first and leave Mrs Patel waiting", score:{dignity:-5,wellbeing:-3,safety:-1,xp:5}, tone:"warn", feedback:"Mrs Patel is left uncomfortable and distressed. Her need was more urgent.", residents:["Mr Lewis"]},
-      {text:"Tell both residents to wait until the handover is finished", score:{safety:-7,dignity:-5,reputation:-3}, tone:"bad", feedback:"Unsafe delay. Call bells should be triaged and responded to promptly."}
-    ]
-  },
-  {
-    time:"07:15",
-    title:"Mr Lewis believes he is late for work",
-    tag:"Dementia care",
-    text:"Mr Lewis is trying to stand without his frame. He says, “I’m late for work — I need to go.”",
-    choices:[
-      {text:"Reassure him, offer his frame, redirect to tea and Newcastle United football", score:{safety:4,wellbeing:5,dignity:3,xp:25}, tone:"good", feedback:"Mr Lewis settles with tea and football conversation. You support safety without arguing with him.", residents:["Mr Lewis"]},
-      {text:"Tell him firmly that he is retired and must sit down", score:{wellbeing:-4,dignity:-2,xp:5}, tone:"warn", feedback:"He becomes more distressed. Correcting him directly did not meet his emotional need."},
-      {text:"Physically stop him from standing without explaining", score:{dignity:-7,wellbeing:-5,reputation:-3}, tone:"bad", feedback:"This risks distress and loss of dignity. Use the least restrictive, person-centred response."}
-    ]
-  },
-  {
-    time:"07:30",
-    title:"Mrs Patel needs urgent toileting support",
-    tag:"Moving & handling",
-    text:"Mrs Patel wants to remain as independent as possible but is unsteady with her frame this morning.",
-    choices:[
-      {text:"Get a colleague, explain each step and support her safely with the frame", score:{safety:5,dignity:5,teamwork:3,xp:25}, tone:"good", feedback:"Safe, dignified and person-centred. Mrs Patel is involved throughout.", residents:["Mrs Patel"]},
-      {text:"Rush her because the medication round is due", score:{safety:-3,dignity:-5,wellbeing:-3}, tone:"bad", feedback:"Rushing increases falls risk and reduces dignity."},
-      {text:"Tell her to wait until after medication round", score:{dignity:-4,wellbeing:-4,reputation:-2}, tone:"warn", feedback:"Her immediate toileting need should be prioritised."}
-    ]
-  },
-  {
-    time:"08:10",
-    title:"Morning medication round",
-    tag:"MAR",
-    text:"Mrs Green refuses her tablets. You have checked the MAR and the prescription, but she says she does not want them.",
-    choices:[
-      {text:"Ask why, assess, explain, respect refusal, document and escalate according to policy", score:{safety:5,dignity:4,reputation:4,xp:30}, tone:"good", feedback:"Correct. Refusal is explored and respected, with documentation and appropriate escalation.", residents:["Mrs Green"]},
-      {text:"Hide the medication in her breakfast so she takes it", score:{safety:-10,dignity:-10,reputation:-8}, tone:"bad", feedback:"Unsafe and inappropriate. Covert administration requires proper legal and clinical processes."},
-      {text:"Leave it undocumented and try again later", score:{safety:-6,reputation:-5}, tone:"bad", feedback:"Medication refusal must be documented and managed according to policy."}
-    ]
-  },
-  {
-    time:"10:45",
-    title:"Mr Baker has fallen",
-    tag:"Emergency",
-    text:"You find Mr Baker on the floor beside his chair. He is awake and speaking, but says his hip hurts.",
-    choices:[
-      {text:"Do not move him unnecessarily; assess, call for clinical help and follow falls procedure", score:{safety:7,teamwork:3,reputation:4,xp:35}, tone:"good", feedback:"Good response. You minimise further injury risk and escalate appropriately.", residents:["Mr Baker"]},
-      {text:"Lift him straight back into the chair", score:{safety:-10,reputation:-6}, tone:"bad", feedback:"Moving him before assessment could worsen an injury."},
-      {text:"Leave him there while you finish another task", score:{safety:-12,dignity:-6,reputation:-8}, tone:"bad", feedback:"A fall requires immediate attention and escalation."}
-    ]
-  },
-  {
-    time:"14:20",
-    title:"Confidentiality challenge",
-    tag:"Family",
-    text:"A visitor asks you what medication another resident takes and why they have been seeing the nurse.",
-    choices:[
-      {text:"Politely explain you cannot share another resident's confidential information", score:{dignity:3,reputation:5,xp:20}, tone:"good", feedback:"Correct. You protect confidentiality while remaining professional."},
-      {text:"Give a brief summary because they seem genuinely concerned", score:{reputation:-8,dignity:-5}, tone:"bad", feedback:"Confidential information must not be shared without proper authority."}
-    ]
-  },
-  {
-    time:"18:35",
-    title:"End-of-shift handover",
-    tag:"Documentation",
-    text:"The evening team is arriving. There have been several significant events during the shift.",
-    choices:[
-      {text:"Complete records, update care notes and give a structured verbal handover", score:{safety:4,teamwork:5,reputation:5,xp:30}, tone:"good", feedback:"Excellent handover. Key risks, refusals, falls and follow-up actions are clearly communicated."},
-      {text:"Leave quickly and assume the notes are enough", score:{teamwork:-5,safety:-3,reputation:-4}, tone:"warn", feedback:"Important context may be missed without a clear handover."}
-    ]
-  }
-];
-
-let state = {};
-let eventIndex = 0;
-let currentChoice = null;
-
-const el = id => document.getElementById(id);
-
-function clamp(v){ return Math.max(0, Math.min(100, v)); }
-
-function resetGame(){
-  state = {...initialStats};
-  eventIndex = 0;
-  currentChoice = null;
-  el("log").innerHTML = "";
-  renderResidents([]);
-  updateStats();
-  renderEvent();
-}
-
-function renderResidents(doneNames=[]){
-  const grid = el("residentGrid");
-  grid.innerHTML = "";
-  residents.forEach(r=>{
-    const card = document.createElement("div");
-    card.className = "resident-card" + (doneNames.includes(r.name) ? " done" : "");
-    card.dataset.name = r.name;
-    card.innerHTML = `<h3>${r.name} · Room ${r.room}</h3>
-      <p>${r.note}</p><p>${r.detail}</p>
-      <div class="status">${doneNames.includes(r.name) ? "✓ Supported this shift" : "Awaiting care"}</div>`;
-    grid.appendChild(card);
-  });
-}
-
-function markResidents(names=[]){
-  names.forEach(name=>{
-    const card = [...document.querySelectorAll(".resident-card")].find(c=>c.dataset.name===name);
-    if(card){
-      card.classList.add("done");
-      const s = card.querySelector(".status");
-      if(s) s.textContent = "✓ Supported this shift";
-    }
-  });
-}
-
-function updateStats(){
-  Object.keys(initialStats).forEach(k=>el(k).textContent = state[k]);
-}
-
-function renderEvent(){
-  const ev = events[eventIndex];
-  if(!ev){
-    finishShift();
-    return;
-  }
-  el("clock").textContent = ev.time;
-  el("eventTitle").textContent = ev.title;
-  el("eventTag").textContent = ev.tag;
-  el("eventText").textContent = ev.text;
-  el("feedback").className = "feedback hidden";
-  const choices = el("choices");
-  choices.innerHTML = "";
-  ev.choices.forEach((c,i)=>{
-    const btn = document.createElement("button");
-    btn.className = "choice-btn";
-    btn.textContent = c.text;
-    btn.onclick = ()=>choose(i);
-    choices.appendChild(btn);
-  });
-}
-
-function choose(i){
-  const ev = events[eventIndex];
-  const c = ev.choices[i];
-  currentChoice = c;
-
-  document.querySelectorAll(".choice-btn").forEach(b=>b.disabled=true);
-  Object.entries(c.score || {}).forEach(([k,v])=>{
-    if(k==="xp") state[k] += v;
-    else state[k] = clamp(state[k] + v);
-  });
-  updateStats();
-  markResidents(c.residents || []);
-  addLog(ev.time, `${ev.title}: ${c.feedback}`);
-
-  el("feedbackTitle").textContent = c.tone==="good" ? "Good decision" : c.tone==="bad" ? "Risk identified" : "Could be improved";
-  el("feedbackText").textContent = c.feedback;
-  el("feedback").className = `feedback ${c.tone}`;
-}
-
-function addLog(time, text){
-  const item = document.createElement("div");
-  item.className = "log-entry";
-  item.innerHTML = `<time>${time}</time>${text}`;
-  el("log").prepend(item);
-}
-
-function finishShift(){
-  el("clock").textContent = "19:00";
-  el("eventTitle").textContent = "Shift complete";
-  el("eventTag").textContent = "Finished";
-  el("eventText").textContent = `You completed the 12-hour shift with ${state.xp} XP. Your final scores are shown above. Restart the shift to try different decisions and improve your care-home rating.`;
-  el("choices").innerHTML = "";
-  el("feedback").className = "feedback good";
-  el("feedbackTitle").textContent = "End of shift";
-  el("feedbackText").textContent = "Records completed. Evening team received handover. Well done, Senior Carer Amy.";
-  el("continueBtn").style.display = "none";
-  addLog("19:00", "Shift complete and handover finished.");
-}
-
-el("continueBtn").onclick = ()=>{
-  eventIndex++;
-  el("continueBtn").style.display = "inline-block";
-  renderEvent();
-};
-el("restartBtn").onclick = ()=>{
-  el("continueBtn").style.display = "inline-block";
-  resetGame();
-};
-
-resetGame();
+const A="assets/";
+const residents=[
+["Mrs Thompson","Room 1","Dementia","Increased confusion overnight"],["Mr Harris","Room 4","Parkinson’s","Settled well"],["Mrs Patel","Room 6","Type 2 diabetes","Blood sugar slightly raised"],["Mr Wilson","Room 8","Post-stroke","Good night"],["Mrs Carter","Room 10","Mobility support","1:1 for transfers"],["Mr Lewis","Room 12","Dementia · high falls risk","Unsettled between 1–3am"],["Mrs Green","Room 14","Pain / comfort","Increased pain"],["Mr Baker","Room 16","High falls risk","Regular checks"]];
+let state={screen:"start",time:"7:00 AM",xp:320,coins:1250,safety:80,dignity:80,wellbeing:80,teamwork:80,reputation:80};
+const app=document.getElementById("app");
+function hero(img="dashboard.jpg"){return `<div class="hero" style="background-image:url('${A+img}')"><div class="profile"><b>Amy</b><small>Senior Carer · Level 5</small><div class="xpbar"><i style="width:${Math.min(100,state.xp/5)}%"></i></div><small>${state.xp}/500 XP</small></div><div class="brand"><div class="heart">♡</div><h1>AMY'S HAVEN</h1><p>CARE HOME</p><p>To care for those who once cared for us is a high honor.</p></div><div class="coins">🪙 ${state.coins} &nbsp; 💗 5</div><div class="timebox">📅 Mon 14 Apr 2026<br><b>🕘 ${state.time}</b><br><small>7:00 AM – 7:00 PM</small></div></div>`}
+function nav(active="Home"){let n=[["Home","⌂"],["Residents","👥"],["Tasks","☑"],["Medication","💊"],["Care Plans","▤"],["Progress","▥"],["Shop","🛒"]];return `<div class="nav">${n.map(x=>`<button class="${x[0]==active?'active':''}" onclick="go('${x[0]}')"><span>${x[1]}</span>${x[0]}</button>`).join("")}</div>`}
+function shell(body,active="Home",img="dashboard.jpg"){app.innerHTML=`<div class="app">${hero(img)}<div class="content">${body}</div>${nav(active)}</div>`}
+function residentRows(){return residents.map((r,i)=>`<div class="row"><div class="face">${i%2?"👴":"👵"}</div><div><b>${r[0]} · ${r[1]}</b><small>${r[2]}<br>${r[3]}</small></div><span class="badge">›</span></div>`).join("")}
+function start(){state.screen="start";shell(`<div class="card"><div class="title"><h2>Start Your Shift</h2></div><p>Ready to make a difference today?</p><div class="stats"><div class="stat">❤️<b>Care</b></div><div class="stat">👥<b>Support</b></div><div class="stat">🤝<b>Respect</b></div><div class="stat">🌿<b>Dignity</b></div><div class="stat">🏠<b>Community</b></div></div></div><div class="btnrow"><div class="card"><b>Today's Shift</b><p>7:00 AM – 7:00 PM<br>12 hour day shift</p><small>“Small acts of kindness make a big difference.”</small></div><div class="card"><b>Staff On Duty</b><p>6/7</p><small>Amy · Senior Carer<br>Sarah · Manager<br>Lisa · Deputy<br>Dan & Chloe · Care Assistants<br>Nurse Emma</small></div></div><div class="card"><b>Overnight Handover Notes</b><p>• Mrs Green had increased pain overnight.<br>• Mr Lewis was unsettled between 1–3am.<br>• Mr Baker had a near fall getting up to the toilet.</p></div><button class="bigbtn" onclick="handover()">▶ Begin Handover</button><div class="footer-note">You've Got This ♥</div>`,"Home","start.jpg")}
+function handover(){state.screen="handover";shell(`<div class="section-tabs"><button class="on">Resident Handover</button><button>General Notes</button><button>Incidents</button><button>Night Tasks</button></div><div class="card"><div class="title"><h2>Resident Handover</h2></div><p>Review each resident before beginning your shift.</p></div><div class="list">${residentRows()}</div><div class="card pink"><b>Key concerns</b><p>Mrs Thompson: increased confusion and poor sleep.<br>Mrs Patel: raised blood glucose overnight.<br>Mr Lewis: unsettled overnight.<br>Mrs Green: increased pain.</p></div><button class="bigbtn" onclick="dashboard()">Complete Handover → Start Your Shift</button>`,"Residents","handover.jpg")}
+function dashboard(){state.screen="dashboard";state.time="7:00 AM";shell(`<div class="card"><div class="title"><h2>Today's Priorities</h2></div><p>🔔 Call bell – Room 12 &nbsp; 🔔 Room 6<br>💊 Morning medication round<br>🚿 Personal care (AM)<br>🍳 Breakfast service<br>🩺 Pain assessment – Mrs Green</p></div><div class="stats"><div class="stat">Residents<b>8</b></div><div class="stat">Staff<b>6/7</b></div><div class="stat">Incidents<b>0</b></div><div class="stat">Mood<b>Good</b></div><div class="stat">XP<b>${state.xp}</b></div></div><div class="card pink"><b>🔔 Live notifications</b><p>7:00 AM — Mr Lewis is calling<br>6:58 AM — Mrs Patel is calling</p><button class="bigbtn" onclick="callbells()">Respond to Call Bells</button></div><div class="card"><b>Your Residents Today (8)</b><div class="list">${residentRows()}</div></div>`,"Home","dashboard.jpg")}
+function callbells(){state.screen="callbells";shell(`<div class="card pink"><div class="title"><h2>🔔 Call Bells Ringing</h2></div><p>Two residents are calling at the same time. Who would you like to respond to first?</p></div><div class="btnrow"><div class="card"><h3>Mr Lewis · Room 12</h3><p>High falls risk · Confusion</p><small>“I need some help…”</small><button class="bigbtn" onclick="lewis()">Respond to Mr Lewis</button></div><div class="card"><h3>Mrs Patel · Room 6</h3><p>Diabetes · Mobility support</p><small>“Can someone come please?”</small><button class="bigbtn" onclick="patel()">Respond to Mrs Patel</button></div></div><div class="card"><b>Consider before you decide</b><p>Who may be at greater risk right now? Can you safely delegate? Remember dignity, safety and documentation.</p></div>${scorebar()}`,"Home","callbells.jpg")}
+function scorebar(){return `<div class="stats"><div class="stat">🛡️<b>${state.safety}</b>Safety</div><div class="stat">💗<b>${state.dignity}</b>Dignity</div><div class="stat">👥<b>${state.wellbeing}</b>Wellbeing</div><div class="stat">🤝<b>${state.teamwork}</b>Teamwork</div><div class="stat">⭐<b>${state.reputation}</b>Reputation</div></div>`}
+function lewis(){state.time="7:04 AM";shell(`<div class="card"><h2>Room 12 · Mr Lewis</h2><p><b>Age:</b> 83 &nbsp; <b>Diagnoses:</b> Dementia, hypertension<br><b>Mobility:</b> Walking frame (1:1 support)<br><b>Likes:</b> Football, radio, cups of tea<br><b>Communication:</b> Calm, simple reassurance</p></div><div class="card pink"><h2>“I need to get to work… I’m late. My boss will be cross!”</h2></div><div class="card"><b>How would you like to respond?</b><div class="btnrow"><button class="choice good" onclick="lewisResult(true)">🤝 Reassure and Redirect<br><small>Use a calm approach and familiar football conversation.</small></button><button class="choice" onclick="lewisResult(false)">💬 Tell Him the Truth<br><small>Explain he is retired and lives here.</small></button><button class="choice warn" onclick="lewisResult(false)">✋ Prevent Him Getting Up</button><button class="choice" onclick="lewisResult(true)">👥 Call for Assistance</button></div></div>${scorebar()}`,"Residents","lewis-decision.jpg")}
+function lewisResult(good){if(good){state.xp+=25;state.safety+=4;state.dignity+=3;state.wellbeing+=5;state.time="7:18 AM"} shell(`<div class="card ${good?'green':'pink'}"><h2>${good?'✓ Great job!':'Consider a calmer approach'}</h2><p>${good?'You used a calm, person-centred approach and helped Mr Lewis feel safe and settled. He is comfortable with a cup of tea and football conversation.':'Mr Lewis becomes more distressed. A person-centred, reassuring response may better meet his emotional need.'}</p>${good?'<h2>+25 XP · Person-Centred Care</h2>':''}</div><div class="card"><b>Care Note – Mr Lewis</b><p>Mr Lewis was confused and believed he needed to go to work. Calm reassurance and familiar conversation used. Supported safely and continued monitoring planned.</p></div><div class="card pink"><b>URGENT · Room 6 – Mrs Patel</b><p>Call bell ringing. “I need some help please…”</p><button class="bigbtn" onclick="patel()">Go to Mrs Patel Now →</button></div>${scorebar()}`,"Residents","lewis-success.jpg")}
+function patel(){state.time="7:24 AM";shell(`<div class="card"><h2>Room 6 · Mrs Patel</h2><p><b>Age:</b> 78 &nbsp; <b>Diagnoses:</b> Type 2 diabetes, osteoarthritis, hypertension<br><b>Mobility:</b> Walking frame (1:1 support)<br><b>Communication:</b> English and Gujarati<br><b>Likes:</b> Tea, traditional music, family</p></div><div class="card pink"><h2>“I really need the toilet. I don’t think I can wait much longer.”</h2></div><div class="card"><b>What would you like to do?</b><div class="btnrow"><button class="choice good" onclick="patelResult()">🚽 Support to the Toilet Now</button><button class="choice">🔎 Assess First</button><button class="choice" onclick="patelResult()">👥 Get Additional Support</button><button class="choice warn">🕘 Encourage to Wait</button></div></div>${scorebar()}`,"Residents","patel.jpg")}
+function patelResult(){state.xp+=25;state.safety+=4;state.dignity+=5;state.time="7:35 AM";meds()}
+function meds(){state.screen="meds";state.time="7:35 AM";shell(`<div class="card"><div class="title"><h2>💊 Morning Medication Round</h2></div><p>Administer, record and monitor safely. <b>2/8 completed</b></p></div><div class="card"><b>Medication safety checks</b><p>✓ Check MAR chart &nbsp; ✓ Right resident &nbsp; ✓ Right medication<br>✓ Right dose &nbsp; ✓ Right time &nbsp; ✓ Right route/reason<br>✓ Allergies and recent changes &nbsp; ✓ Record immediately</p><div class="notice">This game intentionally avoids prescribing real medication regimens. Follow the fictional MAR and workplace policy in each scenario.</div></div><div class="list">${residents.map((r,i)=>`<div class="row"><div class="face">${i%2?'👴':'👵'}</div><div><b>${r[0]} · ${r[1]}</b><small>${i<2?'Recorded':'Medication due — check fictional MAR'}</small></div><button class="badge" onclick="${i==2?'medRefusal()':'this.textContent=`✓ Recorded`;this.disabled=true'}">${i<2?'✓ Given':'Give'}</button></div>`).join("")}</div>`,"Medication","meds.jpg")}
+function medRefusal(){shell(`<div class="card pink"><h2>Mrs Green refuses her medication</h2><p>She says she does not want to take it this morning.</p><div class="btnrow"><button class="choice good" onclick="personal()">Ask why, assess, explain, respect refusal, document and escalate</button><button class="choice warn">Hide it in breakfast</button></div></div><div class="notice">Simulation only: medication decisions must follow the MAR, prescription, capacity/consent processes and local policy.</div>`,"Medication","meds.jpg")}
+function personal(){state.time="7:50 AM";shell(`<div class="card"><h2>🚿 Personal Care</h2><p>Support residents to feel clean, comfortable and confident.</p></div><div class="list">${residents.map((r,i)=>`<div class="row"><div class="face">${i%2?'👴':'👵'}</div><div><b>${r[0]} · ${r[1]}</b><small>${i<2?'✓ Completed':'Due / planned — maintain dignity and independence'}</small></div><span class="badge">${i<2?'View Note':'Start Care'}</span></div>`).join("")}</div><button class="bigbtn" onclick="careplan()">View Mrs Patel Care Plan</button>`,"Tasks","personal.jpg")}
+function careplan(){state.time="8:00 AM";shell(`<div class="card"><h2>Care Plan – Mrs Patel</h2><p><b>Age:</b> 78 · <b>Room:</b> 6</p><p><b>Key information:</b> Type 2 diabetes, hypertension, osteoarthritis; walking frame (1:1 support); at risk of falls; can become anxious if rushed.</p></div><div class="card green"><b>Main Goals</b><p>• Maintain independence and dignity<br>• Support blood glucose monitoring per care plan<br>• Reduce falls risk<br>• Feel safe, valued and involved</p></div><div class="card"><b>Daily Care Needs</b><p>Personal care support · Toileting with frame · Meals and fluids · Observe for concerns · Pain management · Emotional reassurance</p></div><div class="card"><b>Communication</b><p>Speaks English and Gujarati. Calm, reassuring approach. Give time to express needs. Use simple clear language and check understanding.</p></div><button class="bigbtn" onclick="schedule()">Continue Shift →</button>`,"Care Plans","careplan.jpg")}
+function schedule(){state.time="9:15 AM";shell(`<div class="card"><h2>Today's Schedule</h2><p>Shift progress: 28%</p></div><div class="list">${[["7:00","Start Shift","Completed"],["7:15","Personal Care – Mr Lewis","Completed"],["7:30","Personal Care – Mrs Patel","Completed"],["8:00","Morning Medication Round","In Progress"],["8:30","Breakfast Service","Pending"],["9:30","Activities","Pending"],["10:30","Observations","Pending"],["12:00","Lunch Service","Pending"],["1:00","Afternoon Medication Round","Pending"],["2:00","Group Activity","Pending"],["4:00","Care Plan Reviews","Pending"],["6:30","Prepare Handover","Pending"],["7:00","End of Shift","Pending"]].map(x=>`<div class="row"><div class="face">🕘</div><div><b>${x[0]} · ${x[1]}</b><small>${x[2]}</small></div><span class="badge">${x[2]}</span></div>`).join("")}</div><div class="footer-note">It's not just a job… it's a privilege. ♥</div>`,"Tasks","schedule.jpg")}
+function residentsScreen(){shell(`<div class="card"><h2>Residents Overview</h2><p>8 residents · person-centred care at a glance</p></div><div class="list">${residentRows()}</div>`,"Residents","residents.jpg")}
+function go(x){if(x=="Home")dashboard();else if(x=="Residents")residentsScreen();else if(x=="Tasks")schedule();else if(x=="Medication")meds();else if(x=="Care Plans")careplan();else shell(`<div class="card"><h2>${x}</h2><p>This section is ready for the next game expansion.</p></div>` ,x,"dashboard.jpg")}
+start();
