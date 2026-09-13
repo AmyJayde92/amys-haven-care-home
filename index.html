@@ -5,14 +5,30 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#352651">
 <title>Amy's Haven Care Home</title>
-<link rel="stylesheet" href="/amys-haven-care-home/styles.css?v=5">
+<link rel="stylesheet" href="./styles.css?v=6">
+<style>
+  #boot-status{max-width:430px;min-height:100vh;margin:0 auto;background:#faf7fc;display:flex;align-items:center;justify-content:center;padding:24px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;color:#352651;text-align:center}
+</style>
 </head>
 <body>
 <div id="app">
-  <div style="max-width:430px;min-height:100vh;margin:0 auto;background:#faf7fc;display:flex;align-items:center;justify-content:center;padding:24px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;color:#352651;text-align:center">
-    <div><strong style="font-size:22px">Amy's Haven Care Home</strong><br><span style="font-size:14px">Loading game…</span></div>
-  </div>
+  <div id="boot-status"><div><strong style="font-size:22px">Amy's Haven Care Home</strong><br><span style="font-size:14px">Loading game…</span></div></div>
 </div>
-<script src="/amys-haven-care-home/game.js?v=5" onerror="document.getElementById('app').innerHTML='<div style=&quot;padding:30px;text-align:center;font-family:Arial;color:#352651&quot;><h2>Amy\'s Haven Care Home</h2><p>The game file did not load. Please refresh this page.</p></div>'"></script>
+<script>
+window.__gameStarted = false;
+window.addEventListener('error', function (e) {
+  var app = document.getElementById('app');
+  if (!window.__gameStarted && app) {
+    app.innerHTML = '<div id="boot-status"><div><strong style="font-size:22px">Amy\'s Haven Care Home</strong><br><span style="font-size:14px">The game could not start. Please refresh once.</span><br><small style="display:block;margin-top:10px">' + (e.message || 'Loading error') + '</small></div></div>';
+  }
+});
+setTimeout(function () {
+  var app = document.getElementById('app');
+  if (!window.__gameStarted && app && app.textContent.indexOf('Loading game') !== -1) {
+    app.innerHTML = '<div id="boot-status"><div><strong style="font-size:22px">Amy\'s Haven Care Home</strong><br><span style="font-size:14px">The game file did not finish loading. Tap refresh once.</span></div></div>';
+  }
+}, 8000);
+</script>
+<script src="./game.js?v=6" onload="window.__gameStarted=true" onerror="document.getElementById('app').innerHTML='<div id=&quot;boot-status&quot;><div><strong style=&quot;font-size:22px&quot;>Amy\'s Haven Care Home</strong><br><span style=&quot;font-size:14px&quot;>The game file could not be loaded. Tap refresh once.</span></div></div>'"></script>
 </body>
 </html>
