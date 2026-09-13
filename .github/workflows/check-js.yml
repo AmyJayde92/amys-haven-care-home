@@ -12,3 +12,4 @@ jobs:
         with:
           node-version: '22'
       - run: node --check game.js
+      - run: node -e "global.document={getElementById:()=>({innerHTML:''})}; global.window={scrollTo:()=>{}}; require('./game.js'); console.log('runtime ok')"
