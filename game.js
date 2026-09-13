@@ -160,7 +160,7 @@ function patel(){
 function patelResult(){S.xp+=25;S.safety+=4;S.dignity+=5;S.time="7:35 AM";meds()}
 function meds(){
  S.screen="meds";
- const rows=R.map((r,i)=>`<div class="med-row ${i<2?'done':'due'}"><div class="avatar"></div><div><b>${r[0]} · ${r[1]}</b><small>${i<2?'Recorded at '+(i===0?'7:32':'7:34')+' AM':'Medication due — check fictional MAR'}</small></div><button class="med-action" onclick="${i===2?'medRefusal()':'this.textContent='Recorded';this.disabled=true'}">${i<2?'Given':'Give'}</button></div>`).join("");
+ const rows=R.map((r,i)=>`<div class="med-row ${i<2?'done':'due'}"><div class="avatar"></div><div><b>${r[0]} · ${r[1]}</b><small>${i<2?'Recorded at '+(i===0?'7:32':'7:34')+' AM':'Medication due — check fictional MAR'}</small></div><button class="med-action" onclick="${i===2?'medRefusal()':'this.textContent=\'Recorded\';this.disabled=true'}">${i<2?'Given':'Give'}</button></div>`).join("");
  mount(`
  <div class="screen-head"><div class="titlebar"><h2>Morning Medication Round</h2><b>2/8</b></div><div class="progress"><i style="width:25%"></i></div><div class="subtle" style="margin-top:6px">Administer, record and monitor safely.</div></div>
  <div class="card compact"><div class="section-title">Medication Checks</div><div class="subtle">Check MAR · allergies · recent changes · right person · medication · dose · time · route/reason · record immediately.</div></div>
