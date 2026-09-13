@@ -1,20 +1,18 @@
 const app=document.getElementById('app');
 const state={time:'7:00 AM',xp:370,coins:1250,activeBell:null,meds:{}};
 const residents=[
-{name:'Mrs Thompson',room:1,condition:'Dementia',note:'Increased confusion overnight',meds:['Donepezil','Paracetamol'],skin:'#e7c4ad',hair:'#d8d3cc',top:'#8a5f9d',style:'short'},
-{name:'Mr Harris',room:4,condition:'Parkinson’s',note:'Settled well overnight',meds:['Co-careldopa','Ramipril'],skin:'#d7a982',hair:'#b9b5ad',top:'#55758c',style:'side'},
-{name:'Mrs Patel',room:6,condition:'Type 2 diabetes',note:'Blood glucose slightly raised',meds:['Metformin','Amlodipine'],skin:'#b97850',hair:'#43342d',top:'#a75f7c',style:'bun'},
-{name:'Mr Wilson',room:8,condition:'Post-stroke',note:'Good night',meds:['Aspirin','Atorvastatin'],skin:'#e0b694',hair:'#c9c4bb',top:'#68825c',style:'short'},
-{name:'Mrs Carter',room:10,condition:'Mobility support',note:'1:1 for transfers',meds:['Paracetamol'],skin:'#edc9b3',hair:'#eee5dd',top:'#5f789f',style:'wave'},
-{name:'Mr Lewis',room:12,condition:'Dementia · high falls risk',note:'Unsettled between 1–3am',meds:['Memantine','Ramipril'],skin:'#d9aa86',hair:'#aaa49d',top:'#7b654f',style:'side'},
-{name:'Mrs Green',room:14,condition:'Pain / comfort',note:'Increased pain overnight',meds:['Paracetamol','Omeprazole'],skin:'#efc7a7',hair:'#c8bfb3',top:'#8c6d96',style:'wave'},
-{name:'Mr Baker',room:16,condition:'High falls risk',note:'Near fall overnight',meds:['Bisoprolol','Atorvastatin'],skin:'#bd845f',hair:'#8d8881',top:'#526f86',style:'short'}
+{name:'Mrs Thompson',room:1,condition:'Dementia',note:'Increased confusion overnight',meds:['Donepezil','Paracetamol'],photo:'https://randomuser.me/api/portraits/women/65.jpg'},
+{name:'Mr Harris',room:4,condition:'Parkinson’s',note:'Settled well overnight',meds:['Co-careldopa','Ramipril'],photo:'https://randomuser.me/api/portraits/men/75.jpg'},
+{name:'Mrs Patel',room:6,condition:'Type 2 diabetes',note:'Blood glucose slightly raised',meds:['Metformin','Amlodipine'],photo:'https://randomuser.me/api/portraits/women/44.jpg'},
+{name:'Mr Wilson',room:8,condition:'Post-stroke',note:'Good night',meds:['Aspirin','Atorvastatin'],photo:'https://randomuser.me/api/portraits/men/64.jpg'},
+{name:'Mrs Carter',room:10,condition:'Mobility support',note:'1:1 for transfers',meds:['Paracetamol'],photo:'https://randomuser.me/api/portraits/women/79.jpg'},
+{name:'Mr Lewis',room:12,condition:'Dementia · high falls risk',note:'Unsettled between 1–3am',meds:['Memantine','Ramipril'],photo:'https://randomuser.me/api/portraits/men/83.jpg'},
+{name:'Mrs Green',room:14,condition:'Pain / comfort',note:'Increased pain overnight',meds:['Paracetamol','Omeprazole'],photo:'https://randomuser.me/api/portraits/women/68.jpg'},
+{name:'Mr Baker',room:16,condition:'High falls risk',note:'Near fall overnight',meds:['Bisoprolol','Atorvastatin'],photo:'https://randomuser.me/api/portraits/men/72.jpg'}
 ];
-function portrait(r,large=false){
- const hair=r.style==='bun'?`<circle cx="50" cy="19" r="13" fill="${r.hair}"/><path d="M24 42c2-21 14-30 26-30s24 9 26 30l-7-2c-2-14-9-21-19-21s-17 7-19 21z" fill="${r.hair}"/>`:r.style==='wave'?`<path d="M23 44c0-24 12-34 27-34 17 0 28 12 27 35-6-6-11-8-15-11-7 6-20 7-32 2-2 3-4 6-7 8z" fill="${r.hair}"/>`:`<path d="M25 39c2-19 13-28 25-28 14 0 24 8 26 26-8-4-15-6-23-7-9 1-17 4-28 9z" fill="${r.hair}"/>`;
- return `<span class="portrait ${large?'large':''}"><svg viewBox="0 0 100 100" aria-label="Portrait of ${r.name}" role="img"><rect width="100" height="100" rx="18" fill="#ece5df"/><path d="M15 100c3-27 17-40 35-40s32 13 35 40" fill="${r.top}"/>${hair}<ellipse cx="50" cy="43" rx="23" ry="27" fill="${r.skin}"/><ellipse cx="42" cy="43" rx="2.2" ry="2" fill="#3b302b"/><ellipse cx="58" cy="43" rx="2.2" ry="2" fill="#3b302b"/><path d="M46 55c3 2 5 2 8 0" fill="none" stroke="#9d5e59" stroke-width="1.8" stroke-linecap="round"/><path d="M50 45v6" stroke="#b98574" stroke-width="1.3" stroke-linecap="round"/></svg></span>`;
-}
-function carerFigure(){return `<svg class="carer-svg" viewBox="0 0 80 140" role="img" aria-label="Amy, senior carer"><circle cx="40" cy="25" r="17" fill="#e8b997"/><path d="M23 23c2-15 11-22 19-22 11 0 18 7 18 21-7-5-12-7-18-8-7 1-13 4-19 9z" fill="#5a3c31"/><path d="M20 55c8-8 32-8 40 0v45H20z" fill="#6e3c91"/><rect x="29" y="64" width="22" height="10" rx="3" fill="#fff"/><path d="M26 100l-7 35M54 100l7 35M20 65L8 98M60 65l12 33" stroke="#23366f" stroke-width="9" stroke-linecap="round"/></svg>`}
+const amyPhoto='https://randomuser.me/api/portraits/women/32.jpg';
+function portrait(r,large=false){return `<span class="portrait ${large?'large':''}"><img src="${r.photo}" alt="${r.name}" loading="lazy" referrerpolicy="no-referrer"></span>`}
+function carerFigure(){return `<div class="carer-person"><img class="carer-face" src="${amyPhoto}" alt="Amy, senior carer" referrerpolicy="no-referrer"><div class="carer-neck"></div><div class="carer-uniform"><span class="name-badge">AMY</span></div><div class="carer-leg left"></div><div class="carer-leg right"></div></div>`}
 function header(){return `<header class="game-head"><div><h1>Amy</h1><div>Senior Carer · Level 5</div><div class="xpbar"><i style="width:${Math.min(100,state.xp/5)}%"></i></div><small>${state.xp}/500 XP</small></div><div class="brandmark"><span class="house-mark">⌂</span><b>AMY'S HAVEN</b><small>CARE HOME</small></div><div class="head-right"><div class="coins">★ ${state.coins}　♥ 5</div><div class="clock"><b>${state.time}</b><small>Day Shift · 7:00 AM–7:00 PM</small></div></div></header>`}
 function nav(active='Home'){return `<nav class="bottom-nav">${['Home','Residents','Tasks','Medication','Care Plans','Progress','Shop'].map(x=>`<button class="${x===active?'active':''}" onclick="go('${x}')">${x}</button>`).join('')}</nav>`}
 function shell(body,active='Home'){app.innerHTML=`<div class="app-shell">${header()}<main>${body}</main>${nav(active)}</div>`;window.scrollTo(0,0)}
