@@ -1,18 +1,18 @@
 const app=document.getElementById('app');
 const state={time:'7:00 AM',xp:370,coins:1250,activeBell:null,meds:{}};
 const residents=[
-{name:'Mrs Thompson',age:84,room:1,condition:'Dementia',note:'Increased confusion overnight',meds:['Donepezil','Paracetamol'],photo:'https://randomuser.me/api/portraits/women/90.jpg'},
-{name:'Mr Harris',age:81,room:4,condition:'Parkinson’s',note:'Settled well overnight',meds:['Co-careldopa','Ramipril'],photo:'https://randomuser.me/api/portraits/men/91.jpg'},
-{name:'Mrs Patel',age:79,room:6,condition:'Type 2 diabetes',note:'Blood glucose slightly raised',meds:['Metformin','Amlodipine'],photo:'https://randomuser.me/api/portraits/women/89.jpg'},
-{name:'Mr Wilson',age:86,room:8,condition:'Post-stroke',note:'Good night',meds:['Aspirin','Atorvastatin'],photo:'https://randomuser.me/api/portraits/men/94.jpg'},
-{name:'Mrs Carter',age:88,room:10,condition:'Mobility support',note:'1:1 for transfers',meds:['Paracetamol'],photo:'https://randomuser.me/api/portraits/women/88.jpg'},
-{name:'Mr Lewis',age:83,room:12,condition:'Dementia · high falls risk',note:'Unsettled between 1–3am',meds:['Memantine','Ramipril'],photo:'https://randomuser.me/api/portraits/men/90.jpg'},
-{name:'Mrs Green',age:91,room:14,condition:'Pain / comfort',note:'Increased pain overnight',meds:['Paracetamol','Omeprazole'],photo:'https://randomuser.me/api/portraits/women/91.jpg'},
-{name:'Mr Baker',age:78,room:16,condition:'High falls risk',note:'Near fall overnight',meds:['Bisoprolol','Atorvastatin'],photo:'https://randomuser.me/api/portraits/men/89.jpg'}
+{name:'Mrs Thompson',age:84,room:1,condition:'Dementia',note:'Increased confusion overnight',meds:['Donepezil','Paracetamol'],photo:'https://images.pexels.com/photos/9532096/pexels-photo-9532096.jpeg?auto=compress&cs=tinysrgb&w=500'},
+{name:'Mr Harris',age:81,room:4,condition:'Parkinson’s',note:'Settled well overnight',meds:['Co-careldopa','Ramipril'],photo:'https://images.pexels.com/photos/10154682/pexels-photo-10154682.jpeg?auto=compress&cs=tinysrgb&w=500'},
+{name:'Mrs Patel',age:79,room:6,condition:'Type 2 diabetes',note:'Blood glucose slightly raised',meds:['Metformin','Amlodipine'],photo:'https://images.pexels.com/photos/16029767/pexels-photo-16029767.jpeg?auto=compress&cs=tinysrgb&w=500'},
+{name:'Mr Wilson',age:86,room:8,condition:'Post-stroke',note:'Good night',meds:['Aspirin','Atorvastatin'],photo:'https://images.pexels.com/photos/14018035/pexels-photo-14018035.jpeg?auto=compress&cs=tinysrgb&w=500'},
+{name:'Mrs Carter',age:88,room:10,condition:'Mobility support',note:'1:1 for transfers',meds:['Paracetamol'],photo:'https://images.pexels.com/photos/12750171/pexels-photo-12750171.jpeg?auto=compress&cs=tinysrgb&w=500'},
+{name:'Mr Lewis',age:83,room:12,condition:'Dementia · high falls risk',note:'Unsettled between 1–3am',meds:['Memantine','Ramipril'],photo:'https://images.pexels.com/photos/11511808/pexels-photo-11511808.jpeg?auto=compress&cs=tinysrgb&w=500'},
+{name:'Mrs Green',age:91,room:14,condition:'Pain / comfort',note:'Increased pain overnight',meds:['Paracetamol','Omeprazole'],photo:'https://images.pexels.com/photos/19300135/pexels-photo-19300135.jpeg?auto=compress&cs=tinysrgb&w=500'},
+{name:'Mr Baker',age:78,room:16,condition:'High falls risk',note:'Near fall overnight',meds:['Bisoprolol','Atorvastatin'],photo:'https://images.pexels.com/photos/316680/pexels-photo-316680.jpeg?auto=compress&cs=tinysrgb&w=500'}
 ];
 const amyPhoto='https://randomuser.me/api/portraits/women/32.jpg';
-function portrait(r,large=false){return `<span class="portrait ${large?'large':''}"><img src="${r.photo}" alt="${r.name}" loading="lazy" referrerpolicy="no-referrer"></span>`}
-function carerFigure(){return `<div class="carer-person"><img class="carer-face" src="${amyPhoto}" alt="Amy, senior carer" referrerpolicy="no-referrer"><div class="carer-neck"></div><div class="carer-uniform"><span class="name-badge">AMY</span></div><div class="carer-leg left"></div><div class="carer-leg right"></div></div>`}
+function portrait(r,large=false){return `<span class="portrait ${large?'large':''}"><img src="${r.photo}" alt="${r.name}" loading="lazy"></span>`}
+function carerFigure(){return `<div class="carer-person"><img class="carer-face" src="${amyPhoto}" alt="Amy, senior carer"><div class="carer-neck"></div><div class="carer-uniform"><span class="name-badge">AMY</span></div><div class="carer-leg left"></div><div class="carer-leg right"></div></div>`}
 function header(){return `<header class="game-head"><div><h1>Amy</h1><div>Senior Carer · Level 5</div><div class="xpbar"><i style="width:${Math.min(100,state.xp/5)}%"></i></div><small>${state.xp}/500 XP</small></div><div class="brandmark"><span class="house-mark">⌂</span><b>AMY'S HAVEN</b><small>CARE HOME</small></div><div class="head-right"><div class="coins">★ ${state.coins}　♥ 5</div><div class="clock"><b>${state.time}</b><small>Day Shift · 7:00 AM–7:00 PM</small></div></div></header>`}
 function nav(active='Home'){return `<nav class="bottom-nav">${['Home','Residents','Tasks','Medication','Care Plans','Progress','Shop'].map(x=>`<button class="${x===active?'active':''}" onclick="go('${x}')">${x}</button>`).join('')}</nav>`}
 function shell(body,active='Home'){app.innerHTML=`<div class="app-shell">${header()}<main>${body}</main>${nav(active)}</div>`;window.scrollTo(0,0)}
